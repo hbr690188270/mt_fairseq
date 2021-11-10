@@ -1,0 +1,73 @@
+# @package _group_
+
+common:
+  fp16: true
+  log_format: json
+  log_interval: 200
+
+checkpoint:
+  save_interval: 500
+  save_interval_updates: 500
+  keep_interval_updates: 1
+  no_epoch_checkpoints: true
+  best_checkpoint_metric: bleu
+  maximize_best_checkpoint_metric: true
+
+task:
+  _name: translation
+  data: /data/bairu/repos/mt_fairseq/data-bin/iwslt14.tokenized.de-en/
+  source_lang: de
+  target_lang: en
+  truncate_source: true
+  autoregressive: true
+  eval_bleu: true
+  # eval_bleu_args: \'{ "beam": 5, "max_len_a": 1.2, "max_len_b": 10 }\'
+  eval_bleu_detok: moses
+  eval_bleu_print_samples: false
+
+
+dataset:
+  num_workers: 6
+  max_tokens: 8192
+  skip_invalid_size_inputs_valid_test: true
+  validate_after_updates: 500
+  validate_interval: 500
+  valid_subset: valid
+  train_subset: train
+
+distributed_training:
+  ddp_backend: legacy_ddp
+  distributed_world_size: 2
+
+criterion:
+  _name: label_smoothed_cross_entropy
+  report_accuracy: true
+  label_smoothing: 0.1
+
+optimization:
+  max_update: 50000
+  lr: [0.00004]
+  sentence_avg: true
+  update_freq: [1]
+
+optimizer:
+  _name: adam
+  adam_betas: (0.9,0.98)
+  adam_eps: 1e-08
+  clip_norm: 0.0
+  weight_decay: 0.001
+
+
+lr_scheduler:
+  _name: inverse_sqrt
+  warmup_updates: 4000
+
+
+model:
+  _name: transformer
+  arch: transformer_iwslt_de_en
+  share_decoder_input_output_embed: true
+  dropout: 0.3
+  max_source_positions: 1024
+  max_target_positions: 1024
+  min_params_to_wrap: 1e8

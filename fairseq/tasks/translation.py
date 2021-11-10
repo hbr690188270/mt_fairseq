@@ -233,7 +233,7 @@ class TranslationConfig(FairseqDataclass):
         default=False, metadata={"help": "evaluation with BLEU scores"}
     )
     eval_bleu_args: Optional[str] = field(
-        default="{}",
+        default='{"beam": 5, "max_len_a": 1.2, "max_len_b": 10}',
         metadata={
             "help": 'generation args for BLUE scoring, e.g., \'{"beam": 4, "lenpen": 0.6}\', as JSON string'
         },
@@ -434,8 +434,8 @@ class TranslationTask(FairseqTask):
                     bleu = comp_bleu(
                         correct=meters["_bleu_counts"].sum,
                         total=meters["_bleu_totals"].sum,
-                        sys_len=meters["_bleu_sys_len"].sum,
-                        ref_len=meters["_bleu_ref_len"].sum,
+                        sys_len= int(meters["_bleu_sys_len"].sum),
+                        ref_len= int(meters["_bleu_ref_len"].sum),
                         **smooth
                     )
                     return round(bleu.score, 2)
